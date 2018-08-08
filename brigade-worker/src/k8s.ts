@@ -5,9 +5,9 @@
 /** */
 
 import * as kubernetes from "@kubernetes/client-node";
-import * as jobs from "./job";
-import { LogLevel, ContextLogger } from "./logger";
-import { BrigadeEvent, Project } from "./events";
+import * as jobs from "@azure/brigadier/out/job";
+import { LogLevel, ContextLogger } from "@azure/brigadier/out/logger";
+import { BrigadeEvent, Project } from "@azure/brigadier/out/events";
 
 // The internals for running tasks. This must be loaded before any of the
 // objects that use run().
@@ -170,8 +170,12 @@ export class JobRunner implements jobs.JobRunner {
   options: KubernetesOptions;
   serviceAccount: string;
   logger: ContextLogger;
+  
+  constructor() {}
 
-  constructor(job: jobs.Job, e: BrigadeEvent, project: Project) {
+  public init<T extends jobs.Job>(job: T, e: BrigadeEvent, project: Project) {
+    // init takes a generic so we can run this against mocks as well as against the real
+    // Job type.
     this.options = Object.assign({}, options);
 
     this.event = e;
@@ -350,6 +354,7 @@ export class JobRunner implements jobs.JobRunner {
         this.runner.spec.containers[i].securityContext.privileged = true;
       }
     }
+    return this;
   }
 
   /**
